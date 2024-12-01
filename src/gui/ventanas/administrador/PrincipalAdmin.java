@@ -1,6 +1,10 @@
 package gui.ventanas.administrador;
 
-import gui.ventanas.InicioSesion; // Importar la clase InicioSesion
+import gui.ventanas.InicioSesion;
+import gui.ventanas.cajero.PrincipalCajero;
+import gui.ventanas.administrador.usuarios.GestionUsuarios;
+import gui.ventanas.administrador.ventas.GestionVentas;
+import gui.ventanas.administrador.productos.GestionProductos;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -29,9 +33,9 @@ public class PrincipalAdmin extends Application {
         Button btnCerrarSesion = new Button("", cerrarSesionView);
         btnCerrarSesion.setStyle("-fx-background-color: transparent;");
         btnCerrarSesion.setOnAction(e -> {
-            InicioSesion inicioSesion = new InicioSesion(); // Crear instancia de InicioSesion
+            InicioSesion inicioSesion = new InicioSesion();
             try {
-                inicioSesion.start(primaryStage); // Iniciar la ventana de inicio de sesión
+                inicioSesion.start(primaryStage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -51,24 +55,56 @@ public class PrincipalAdmin extends Application {
         gestionarProductosImg.setPreserveRatio(true);
 
         ImageView abrirMenuCajaImg = new ImageView(new Image("https://objectstorage.us-ashburn-1.oraclecloud.com/n/idew1j1vbcak/b/bucket-20241201-0716/o/AbrirMenuDeCaja.png"));
-        abrirMenuCajaImg.setFitWidth(250); // Botón de menú de caja más grande
+        abrirMenuCajaImg.setFitWidth(250);
         abrirMenuCajaImg.setPreserveRatio(true);
 
         // Botones funcionales con imágenes
         Button btnGestionarUsuarios = new Button("", gestionarUsuariosImg);
         btnGestionarUsuarios.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 10; -fx-background-radius: 10;");
         btnGestionarUsuarios.setPrefSize(150, 150);
+        btnGestionarUsuarios.setOnAction(e -> {
+            GestionUsuarios gestionUsuarios = new GestionUsuarios();
+            try {
+                gestionUsuarios.start(primaryStage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
 
         Button btnGestionarVentas = new Button("", gestionarVentasImg);
         btnGestionarVentas.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 10; -fx-background-radius: 10;");
         btnGestionarVentas.setPrefSize(150, 150);
+        btnGestionarVentas.setOnAction(e -> {
+            GestionVentas gestionVentas = new GestionVentas();
+            try {
+                gestionVentas.start(primaryStage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
 
         Button btnGestionarProductos = new Button("", gestionarProductosImg);
         btnGestionarProductos.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 10; -fx-background-radius: 10;");
         btnGestionarProductos.setPrefSize(150, 150);
+        btnGestionarProductos.setOnAction(e -> {
+            GestionProductos gestionProductos = new GestionProductos();
+            try {
+                gestionProductos.start(primaryStage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
 
         Button btnAbrirMenuCaja = new Button("", abrirMenuCajaImg);
         btnAbrirMenuCaja.setStyle("-fx-background-color: transparent;");
+        btnAbrirMenuCaja.setOnAction(e -> {
+            PrincipalCajero principalCajero = new PrincipalCajero();
+            try {
+                principalCajero.start(primaryStage);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
 
         // HBox para los botones principales
         HBox mainButtons = new HBox(50, btnGestionarUsuarios, btnGestionarVentas, btnGestionarProductos);
@@ -93,7 +129,7 @@ public class PrincipalAdmin extends Application {
         BorderPane.setMargin(btnCerrarSesion, new Insets(10));
 
         // Estilo del fondo
-        root.setStyle("-fx-background-color: #999999;"); // Fondo gris oscuro
+        root.setStyle("-fx-background-color: #999999;");
 
         // Crear escena
         Scene scene = new Scene(root, 1024, 768);

@@ -31,6 +31,8 @@ public class EmpleadoRep {
     public ListaEnlazada<Empleado> listarEmpleados() throws SQLException {
         String sql = "SELECT * FROM empleado";
         ListaEnlazada<Empleado> empleados = new ListaEnlazada<>();
+
+        // Usa try-with-resources para cerrar recursos automáticamente
         try (Connection conexion = Conexion.getConexion();
              Statement stmt = conexion.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -46,9 +48,14 @@ public class EmpleadoRep {
                 );
                 empleados.insertar(empleado);
             }
+        } catch (SQLException e) {
+            System.err.println("Error al listar empleados: " + e.getMessage());
+            throw e; // Lanza la excepción para que sea manejada en un nivel superior
         }
+
         return empleados;
     }
+
 
     // Método para buscar un empleado por su ID
     public Empleado buscarEmpleadoPorId(int id) throws SQLException {

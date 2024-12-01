@@ -96,7 +96,7 @@ public class InicioSesion extends Application {
         // Contenedor raíz
         StackPane root = new StackPane(centerBox);
         root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-background-color: #A9A9A9;");
+        root.setStyle("-fx-background-color: #999999;");
 
         // Escena
         Scene scene = new Scene(root, 1024, 768);

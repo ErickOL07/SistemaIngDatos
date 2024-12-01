@@ -32,9 +32,11 @@ public class Conexion {
         }
     }
 
-    public static Connection getConexion() {
-        return conexion;
+    // Método para obtener una nueva conexión
+    public static Connection getConexion() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
+
 
     public static void setConexion(Connection conexion) {
         Conexion.conexion = conexion;
