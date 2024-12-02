@@ -64,8 +64,10 @@ public class GestionUsuarios extends Application {
 
         // Tabla de usuarios
         TableView<Empleado> tablaUsuarios = new TableView<>();
-        tablaUsuarios.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); // Ajustar columnas automáticamente
+        tablaUsuarios.setId("tablaUsuarios"); // Asignar un ID para acceder desde EdicionU
+        tablaUsuarios.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tablaUsuarios.setPrefHeight(400);
+
 
         // Columnas de la tabla
         TableColumn<Empleado, String> colID = new TableColumn<>("ID");
@@ -140,7 +142,8 @@ public class GestionUsuarios extends Application {
     }
 
     // Método para llenar la tabla desde la base de datos
-    private void llenarTabla(TableView<Empleado> tablaUsuarios) {
+    public void llenarTabla(TableView<Empleado> tablaUsuarios) {
+        tablaUsuarios.getItems().clear(); // Limpiar los datos actuales de la tabla
         try {
             ListaEnlazada<Empleado> empleados = empleadoRep.listarEmpleados();
             if (empleados != null) {
@@ -156,6 +159,9 @@ public class GestionUsuarios extends Application {
             e.printStackTrace();
         }
     }
+
+
+
 
     public static void main(String[] args) {
         launch(args);
