@@ -72,4 +72,9 @@ public class ListaEnlazada<T> {
         return c;
     }
 
+    public void clear() {
+        head = null;
+    }
+
+
 }

@@ -19,13 +19,11 @@ public class PrincipalAdmin extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        // Logo principal
         Image logoImage = new Image("https://objectstorage.us-ashburn-1.oraclecloud.com/n/idew1j1vbcak/b/bucket-20241201-0716/o/LogoMundoMascotasMundo%20Mascotas%20-%20Logo.png");
         ImageView logoView = new ImageView(logoImage);
         logoView.setFitWidth(300);
         logoView.setPreserveRatio(true);
 
-        // Imagen de cerrar sesión
         Image cerrarSesionImage = new Image("https://objectstorage.us-ashburn-1.oraclecloud.com/n/idew1j1vbcak/b/bucket-20241201-0716/o/CerrarSesion.png");
         ImageView cerrarSesionView = new ImageView(cerrarSesionImage);
         cerrarSesionView.setFitWidth(50);
@@ -58,7 +56,6 @@ public class PrincipalAdmin extends Application {
         abrirMenuCajaImg.setFitWidth(250);
         abrirMenuCajaImg.setPreserveRatio(true);
 
-        // Botones funcionales con imágenes
         Button btnGestionarUsuarios = new Button("", gestionarUsuariosImg);
         btnGestionarUsuarios.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 10; -fx-background-radius: 10;");
         btnGestionarUsuarios.setPrefSize(150, 150);
@@ -106,20 +103,16 @@ public class PrincipalAdmin extends Application {
             }
         });
 
-        // HBox para los botones principales
         HBox mainButtons = new HBox(50, btnGestionarUsuarios, btnGestionarVentas, btnGestionarProductos);
         mainButtons.setAlignment(Pos.CENTER);
 
-        // VBox para el botón de abrir menú de caja
         VBox menuCajaBox = new VBox(btnAbrirMenuCaja);
         menuCajaBox.setAlignment(Pos.BOTTOM_LEFT);
         menuCajaBox.setPadding(new Insets(20));
 
-        // VBox para el logo y botones
         VBox layout = new VBox(20, logoView, mainButtons);
         layout.setAlignment(Pos.CENTER);
 
-        // BorderPane para organizar toda la interfaz
         BorderPane root = new BorderPane();
         root.setCenter(layout);
         root.setTop(btnCerrarSesion);
@@ -128,10 +121,8 @@ public class PrincipalAdmin extends Application {
         BorderPane.setAlignment(btnCerrarSesion, Pos.TOP_RIGHT);
         BorderPane.setMargin(btnCerrarSesion, new Insets(10));
 
-        // Estilo del fondo
         root.setStyle("-fx-background-color: #999999;");
 
-        // Crear escena
         Scene scene = new Scene(root, 1024, 768);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Mundo Mascotas - Menú Principal del Administrador");

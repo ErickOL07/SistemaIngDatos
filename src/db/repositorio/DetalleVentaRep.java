@@ -4,87 +4,54 @@ import db.config.Conexion;
 import db.modelo.Detalle_Venta;
 import tda.ListaEnlazada;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class DetalleVentaRep {
 
-    // Método para insertar un detalle de venta
-    public void insertarDetalleVenta(Detalle_Venta detalleVenta) throws SQLException {
-        String sql = "INSERT INTO detalle_venta (venta_id, producto_id, cantidad) VALUES ("
-                + detalleVenta.getVenta_Id() + ", "
-                + detalleVenta.getProducto_Id() + ", "
-                + detalleVenta.getCantidad() + ")";
+    private int obtenerConcatenadaId(String codigo) throws SQLException {
+        String query = "SELECT concatenada_id FROM concatenada WHERE descripcion = ?";
         try (Connection conexion = Conexion.getConexion();
-             Statement stmt = conexion.createStatement()) {
-            stmt.executeUpdate(sql);
-            System.out.println("Detalle de venta insertado: " + detalleVenta);
-        }
-    }
-
-    // Método para listar todos los detalles de venta
-    public ListaEnlazada<Detalle_Venta> listarDetallesVenta() throws SQLException {
-        String sql = "SELECT * FROM detalle_venta";
-        ListaEnlazada<Detalle_Venta> detalles = new ListaEnlazada<>();
-        try (Connection conexion = Conexion.getConexion();
-             Statement stmt = conexion.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                Detalle_Venta detalle = new Detalle_Venta(
-                        rs.getInt("venta_id"),
-                        rs.getInt("producto_id"),
-                        rs.getInt("cantidad")
-                );
-                detalles.insertar(detalle);
+             PreparedStatement stmt = conexion.prepareStatement(query)) {
+            stmt.setString(1, codigo);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("concatenada_id");
+            } else {
+                throw new SQLException("No se encontró un registro en la tabla concatenada con el código: " + codigo);
             }
         }
-        return detalles;
     }
 
-    // Método para buscar un detalle de venta por Venta_Id
-    public ListaEnlazada<Detalle_Venta> buscarDetallePorVentaId(int ventaId) throws SQLException {
-        String sql = "SELECT * FROM detalle_venta WHERE venta_id = " + ventaId;
-        ListaEnlazada<Detalle_Venta> detalles = new ListaEnlazada<>();
-        try (Connection conexion = Conexion.getConexion();
-             Statement stmt = conexion.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+    public void insertarOActualizarDetalleVenta(Detalle_Venta detalleVenta) throws SQLException {
+        String verificarSql = "SELECT cantidad FROM detalle_venta WHERE venta_id = ? AND producto_id = ?";
+        String actualizarSql = "UPDATE detalle_venta SET cantidad = cantidad + ? WHERE venta_id = ? AND producto_id = ?";
+        String insertarSql = "INSERT INTO detalle_venta (cantidad, concatenada_id, venta_id, producto_id) VALUES (?, ?, ?, ?)";
 
-            while (rs.next()) {
-                Detalle_Venta detalle = new Detalle_Venta(
-                        rs.getInt("venta_id"),
-                        rs.getInt("producto_id"),
-                        rs.getInt("cantidad")
-                );
-                detalles.insertar(detalle);
+        try (Connection conexion = Conexion.getConexion()) {
+            try (PreparedStatement verificarStmt = conexion.prepareStatement(verificarSql)) {
+                verificarStmt.setInt(1, detalleVenta.getVentaId());
+                verificarStmt.setInt(2, detalleVenta.getProductoId());
+                ResultSet rs = verificarStmt.executeQuery();
+
+                if (rs.next()) {
+                    try (PreparedStatement actualizarStmt = conexion.prepareStatement(actualizarSql)) {
+                        actualizarStmt.setInt(1, detalleVenta.getCantidad());
+                        actualizarStmt.setInt(2, detalleVenta.getVentaId());
+                        actualizarStmt.setInt(3, detalleVenta.getProductoId());
+                        actualizarStmt.executeUpdate();
+                    }
+                } else {
+                    try (PreparedStatement insertarStmt = conexion.prepareStatement(insertarSql)) {
+                        insertarStmt.setInt(1, detalleVenta.getCantidad());
+                        insertarStmt.setInt(2, obtenerConcatenadaId(detalleVenta.getConcatenadaDesc()));
+                        insertarStmt.setInt(3, detalleVenta.getVentaId());
+                        insertarStmt.setInt(4, detalleVenta.getProductoId());
+                        insertarStmt.executeUpdate();
+                    }
+                }
             }
         }
-        return detalles;
     }
 
-    // Método para actualizar un detalle de venta
-    public void actualizarDetalleVenta(Detalle_Venta detalleVenta) throws SQLException {
-        String sql = "UPDATE detalle_venta SET cantidad = " 
-                + detalleVenta.getCantidad() + " WHERE venta_id = " 
-                + detalleVenta.getVenta_Id() + " AND producto_id = " 
-                + detalleVenta.getProducto_Id();
-        try (Connection conexion = Conexion.getConexion();
-             Statement stmt = conexion.createStatement()) {
-            stmt.executeUpdate(sql);
-            System.out.println("Detalle de venta actualizado: " + detalleVenta);
-        }
-    }
 
-    // Método para eliminar un detalle de venta
-    public void eliminarDetalleVenta(int ventaId, int productoId) throws SQLException {
-        String sql = "DELETE FROM detalle_venta WHERE venta_id = " 
-                + ventaId + " AND producto_id = " + productoId;
-        try (Connection conexion = Conexion.getConexion();
-             Statement stmt = conexion.createStatement()) {
-            stmt.executeUpdate(sql);
-            System.out.println("Detalle de venta eliminado con Venta_Id: " + ventaId + " y Producto_Id: " + productoId);
-        }
-    }
 }

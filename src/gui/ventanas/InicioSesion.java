@@ -32,37 +32,31 @@ import javafx.scene.control.Alert.AlertType;
 public class InicioSesion extends Application {
 
     private final EmpleadoRep empleadoRep = new EmpleadoRep();
-
+    public static Empleado empleadoAutenticado;
     @Override
     public void start(Stage primaryStage) {
-        // Imagen del logo
         Image logo = new Image("https://objectstorage.us-ashburn-1.oraclecloud.com/n/idew1j1vbcak/b/bucket-20241201-0716/o/LogoMundoMascotasMundo%20Mascotas%20-%20Logo.png");
         ImageView logoView = new ImageView(logo);
         logoView.setFitWidth(180);
         logoView.setPreserveRatio(true);
 
-        // Título
         Text title = new Text("INICIAR SESIÓN");
         title.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         title.setFill(Color.BLACK);
 
-        // Campo de usuario
         TextField userField = new TextField();
         userField.setPromptText("Usuario");
         userField.setMaxWidth(200);
 
-        // Campo de contraseña
         PasswordField passwordField = new PasswordField();
         passwordField.setPromptText("Contraseña");
         passwordField.setMaxWidth(200);
 
-        // Botón de ingreso
         Button loginButton = new Button("INGRESAR");
         loginButton.setFont(Font.font("Arial", FontWeight.BOLD, 20));
         loginButton.setStyle("-fx-background-color: #E0E0E0; -fx-text-fill: #FFA500;");
         loginButton.setMaxWidth(200);
 
-        // Acción del botón de ingreso
         loginButton.setOnAction(e -> {
             String usuario = userField.getText();
             String contrasena = passwordField.getText();
@@ -81,11 +75,9 @@ public class InicioSesion extends Application {
 
 
 
-        // Contenedor del formulario
         VBox formBox = new VBox(15, userField, passwordField, loginButton);
         formBox.setAlignment(Pos.CENTER);
 
-        // Contenedor central cuadrado con bordes redondeados
         VBox centerBox = new VBox(20, logoView, title, formBox);
         centerBox.setAlignment(Pos.CENTER);
         centerBox.setPadding(new Insets(20));
@@ -93,12 +85,10 @@ public class InicioSesion extends Application {
         centerBox.setMaxWidth(300);
         centerBox.setMaxHeight(300);
 
-        // Contenedor raíz
         StackPane root = new StackPane(centerBox);
         root.setAlignment(Pos.CENTER);
         root.setStyle("-fx-background-color: #999999;");
 
-        // Escena
         Scene scene = new Scene(root, 1024, 768);
 
         primaryStage.setTitle("Mundo Mascotas - Inicio de Sesión");
@@ -106,7 +96,6 @@ public class InicioSesion extends Application {
         primaryStage.show();
     }
 
-    // Método para validar credenciales de inicio de sesión
     private Empleado validarCredenciales(String correo, String contrasena) {
         try {
             Empleado empleado = empleadoRep.buscarEmpleadoPorCorreo(correo);
@@ -127,17 +116,26 @@ public class InicioSesion extends Application {
         alerta.showAndWait();
     }
 
-    // Método para mostrar un error
-    private void mostrarError(String mensaje) {
-        System.out.println("Error: " + mensaje);
+
+    public static void main(String[] args) {
+        try {
+            System.out.println("Conexión realizada correctamente.");
+
+            listarEmpleados();
+
+        } catch (Exception e) {
+            System.err.println("Error en la conexión: " + e.getMessage());
+        }
+        launch(args);
     }
 
     private void redirigirSegunRol(Stage primaryStage, Empleado empleado) {
+        empleadoAutenticado = empleado;
         try {
-            if (empleado.getRol_Id() == 1) { // Administrador
+            if (empleado.getRol_Id() == 1) {
                 PrincipalAdmin adminWindow = new PrincipalAdmin();
                 adminWindow.start(primaryStage);
-            } else if (empleado.getRol_Id() == 2) { // Cajero
+            } else if (empleado.getRol_Id() == 2) {
                 PrincipalCajero cajeroWindow = new PrincipalCajero();
                 cajeroWindow.start(primaryStage);
             } else {
@@ -149,22 +147,9 @@ public class InicioSesion extends Application {
         }
     }
 
-    public static void main(String[] args) {
-        try {
-            Connection conexion = Conexion.conectar();
-            System.out.println("Conexión realizada correctamente.");
 
-            // Mostrar todos los empleados en la consola
-            listarEmpleados();
-
-        } catch (Exception e) {
-            System.err.println("Error en la conexión: " + e.getMessage());
-        }
-        launch(args);
-    }
-
-    // Método para listar empleados y mostrarlos en consola
     private static void listarEmpleados() {
+
         String sql = "SELECT * FROM empleado";
         try (Connection conexion = Conexion.conectar();
              Statement stmt = conexion.createStatement();
@@ -177,8 +162,7 @@ public class InicioSesion extends Application {
             System.out.println("-------------------------------------------------");
 
             while (rs.next()) {
-                System.out.printf("%-10d %-30s %-30s %-20s %-10d %-15s\n",
-                        rs.getInt("empleado_id"),
+                System.out.printf("%-30s %-30s %-20s %-10d %-15s\n",
                         rs.getString("nombre"),
                         rs.getString("correo_electronico"),
                         rs.getString("contrasena"),
@@ -211,19 +195,6 @@ public class InicioSesion extends Application {
             System.err.println("Error al listar empleados: " + e.getMessage());
         }
     }
-
-
-    /*
-    public static void main(String[] args) {
-        try {
-            Connection conexion = Conexion.conectar();
-            System.out.println("Conexión realizada correctamente.");
-        } catch (Exception e) {
-            System.err.println("Error en la conexión: " + e.getMessage());
-        }
-        launch(args);
-    }
-*/
 }
 
 

@@ -4,90 +4,34 @@ import db.config.Conexion;
 import db.modelo.Venta;
 import tda.ListaEnlazada;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class VentaRep {
 
-    // Método para insertar una venta
-    public void insertarVenta(Venta venta) throws SQLException {
-        String sql = "INSERT INTO venta (venta_id, monto_total, fecha_venta, cliente_id, empleado_id, metodo_pago_id) VALUES ("
-                + venta.getVenta_Id() + ", "
-                + venta.getMonto_Total() + ", '"
-                + venta.getFecha_Venta() + "', "
-                + venta.getCliente_Id() + ", "
-                + venta.getEmpleado_Id() + ", "
-                + venta.getMetodo_Pago_Id() + ")";
+    public int insertarVenta(Venta venta) throws SQLException {
+        String sql = "{CALL sp_insertar_venta(?, ?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conexion = Conexion.getConexion();
-             Statement stmt = conexion.createStatement()) {
-            stmt.executeUpdate(sql);
-            System.out.println("Venta insertada: " + venta);
+             CallableStatement stmt = conexion.prepareCall(sql)) {
+
+            stmt.setFloat(1, venta.getMonto_Total());
+            stmt.setFloat(2, venta.getDescuento());
+            stmt.setDate(3, Date.valueOf(venta.getFecha_Venta()));
+            stmt.setInt(4, venta.getCliente_Id());
+            stmt.setInt(5, venta.getEmpleado_Id());
+            stmt.setInt(6, venta.getMetodo_Pago_Id());
+            stmt.setInt(7, venta.getForma_Pago_Id());
+
+            stmt.registerOutParameter(8, java.sql.Types.INTEGER);
+
+            stmt.execute();
+
+            int ventaId = stmt.getInt(8);
+            System.out.println("ID de la venta generado: " + ventaId);
+            venta.setVenta_Id(ventaId); // Actualiza el ID en el objeto Venta
+            return ventaId;
         }
     }
 
-    // Método para listar todas las ventas
-    public ListaEnlazada<Venta> listarVentas() throws SQLException {
-        String sql = "SELECT * FROM venta";
-        ListaEnlazada<Venta> ventas = new ListaEnlazada<>();
-        try (Connection conexion = Conexion.getConexion();
-             Statement stmt = conexion.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            while (rs.next()) {
-                Venta venta = new Venta(
-                        rs.getInt("venta_id"),
-                        rs.getFloat("monto_total"),
-                        rs.getString("fecha_venta"),
-                        rs.getInt("cliente_id"),
-                        rs.getInt("empleado_id"),
-                        rs.getInt("metodo_pago_id")
-                );
-                ventas.insertar(venta);
-            }
-        }
-        return ventas;
-    }
-
-    // Método para buscar una venta por su ID
-    public Venta buscarVentaPorId(int id) throws SQLException {
-        String sql = "SELECT * FROM venta WHERE venta_id = " + id;
-        try (Connection conexion = Conexion.getConexion();
-             Statement stmt = conexion.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-
-            if (rs.next()) {
-                return new Venta(
-                        rs.getInt("venta_id"),
-                        rs.getFloat("monto_total"),
-                        rs.getString("fecha_venta"),
-                        rs.getInt("cliente_id"),
-                        rs.getInt("empleado_id"),
-                        rs.getInt("metodo_pago_id")
-                );
-            }
-        }
-        return null; // Si no se encuentra
-    }
-
-    // Método para actualizar una venta
-    public void actualizarVenta(Venta venta) throws SQLException {
-        String sql = "UPDATE venta SET monto_total = "
-                + venta.getMonto_Total() + ", fecha_venta = '"
-                + venta.getFecha_Venta() + "', cliente_id = "
-                + venta.getCliente_Id() + ", empleado_id = "
-                + venta.getEmpleado_Id() + ", metodo_pago_id = "
-                + venta.getMetodo_Pago_Id() + " WHERE venta_id = "
-                + venta.getVenta_Id();
-        try (Connection conexion = Conexion.getConexion();
-             Statement stmt = conexion.createStatement()) {
-            stmt.executeUpdate(sql);
-            System.out.println("Venta actualizada: " + venta);
-        }
-    }
-
-    // Método para eliminar una venta
     public void eliminarVenta(int id) throws SQLException {
         String sql = "DELETE FROM venta WHERE venta_id = " + id;
         try (Connection conexion = Conexion.getConexion();
@@ -96,4 +40,28 @@ public class VentaRep {
             System.out.println("Venta eliminada con ID: " + id);
         }
     }
+
+    public ResultSet generarReporteVenta(int ventaId) throws SQLException {
+        String sql = "{CALL sp_generar_reporte_venta(?)}";
+        Connection conexion = Conexion.getConexion();
+        CallableStatement stmt = conexion.prepareCall(sql);
+        stmt.setInt(1, ventaId);
+        return stmt.executeQuery();
+    }
+
+
+    public int obtenerUltimaVentaId() throws SQLException {
+        String sql = "SELECT MAX(venta_id) AS ultima_id FROM venta";
+        try (Connection conexion = Conexion.getConexion();
+             Statement stmt = conexion.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+
+            if (rs.next()) {
+                return rs.getInt("ultima_id");
+            }
+        }
+        return -1;
+    }
+
+
 }

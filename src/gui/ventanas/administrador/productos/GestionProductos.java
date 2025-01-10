@@ -1,6 +1,5 @@
 package gui.ventanas.administrador.productos;
 
-import db.config.Conexion;
 import db.modelo.Producto;
 import db.repositorio.ProductoRep;
 import gui.ventanas.administrador.PrincipalAdmin;
@@ -16,15 +15,12 @@ import javafx.stage.Stage;
 import tda.ListaEnlazada;
 import tda.Nodo;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 public class GestionProductos extends Application {
 
     private final ProductoRep productoRep = new ProductoRep();
-    private static Producto productoSeleccionado; // Variable para almacenar el producto seleccionado
+    private static Producto productoSeleccionado;
 
     public static Producto getProductoSeleccionado() {
         return productoSeleccionado;
@@ -53,7 +49,7 @@ public class GestionProductos extends Application {
         btnVolver.setStyle("-fx-background-color: transparent;");
         btnVolver.setOnAction(e -> {
             try {
-                new PrincipalAdmin().start(primaryStage); // Regresa a PrincipalAdmin
+                new PrincipalAdmin().start(primaryStage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -93,20 +89,19 @@ public class GestionProductos extends Application {
 
         tablaProductos.getColumns().addAll(colID, colCategoria, colSubcategoria, colDescripcion, colPrecio, colStock);
 
-        // Detectar selección en la tabla
         tablaProductos.setRowFactory(tv -> {
             TableRow<Producto> row = new TableRow<>();
             row.itemProperty().addListener((obs, oldItem, newItem) -> {
                 if (newItem != null) {
                     if (newItem.getStock() == 0) {
-                        row.setStyle("-fx-background-color: #FF6666;"); // Rojo para stock cero
+                        row.setStyle("-fx-background-color: #FF6666;"); // Rojo para stock 0
                     } else if (newItem.getStock() > 0 && newItem.getStock() <= 10) {
                         row.setStyle("-fx-background-color: #FFFF99;"); // Amarillo para stock bajo
                     } else {
-                        row.setStyle(""); // Sin color para stock normal
+                        row.setStyle("");
                     }
                 } else {
-                    row.setStyle(""); // Restablecer estilo
+                    row.setStyle("");
                 }
             });
 
@@ -115,19 +110,15 @@ public class GestionProductos extends Application {
                     Producto productoSeleccionado = row.getItem();
                     if (productoSeleccionado != null) {
                         try {
-                            // Obtener la descripción concatenada seleccionada
                             String descripcionConcatenada = productoSeleccionado.getConcatenadaDesc();
-
-                            // Buscar el producto_id correspondiente
                             Integer productoId = productoRep.buscarProductoIdPorConcatenada(descripcionConcatenada);
 
                             if (productoId != null) {
-                                // Obtener los detalles del producto por producto_id
                                 Producto producto = productoRep.buscarProductoPorId(productoId);
 
                                 if (producto != null) {
                                     GestionProductos.productoSeleccionado = producto;
-                                    new EdicionP().start(primaryStage); // Abrir la ventana de edición
+                                    new EdicionP().start(primaryStage, tablaProductos); // Pasar la tabla
                                 } else {
                                     Alert alerta = new Alert(Alert.AlertType.WARNING, "No se encontró el producto.");
                                     alerta.showAndWait();
@@ -147,6 +138,7 @@ public class GestionProductos extends Application {
 
 
 
+
             return row;
         });
 
@@ -157,7 +149,7 @@ public class GestionProductos extends Application {
         btnRegistrar.setPrefWidth(250);
         btnRegistrar.setOnAction(e -> {
             try {
-                new CreacionP().start(primaryStage); // Abrir CreacionP
+                new CreacionP().start(primaryStage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -172,7 +164,6 @@ public class GestionProductos extends Application {
         tableContainer.setPadding(new Insets(20));
         tableContainer.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-width: 1;");
 
-        // Llenar la tabla desde la base de datos
         llenarTabla(tablaProductos);
 
         // Layout principal
@@ -188,9 +179,8 @@ public class GestionProductos extends Application {
         primaryStage.show();
     }
 
-    // Método para llenar la tabla desde la base de datos
-    private void llenarTabla(TableView<Producto> tablaProductos) {
-        tablaProductos.getItems().clear(); // Limpiar los datos actuales de la tabla
+    public void llenarTabla(TableView<Producto> tablaProductos) {
+        tablaProductos.getItems().clear();
         try {
             ListaEnlazada<Producto> productos = productoRep.obtenerDetallesProductos();
             if (productos != null) {

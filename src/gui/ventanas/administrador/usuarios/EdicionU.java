@@ -16,7 +16,6 @@ public class EdicionU {
     private final EmpleadoRep empleadoRep = new EmpleadoRep();
 
     public void start(Stage parentStage) {
-        // Obtener el empleado seleccionado
         Empleado empleado = GestionUsuarios.getEmpleadoSeleccionado();
         if (empleado == null) {
             Alert alerta = new Alert(Alert.AlertType.ERROR, "No se seleccionó ningún usuario.");
@@ -24,19 +23,16 @@ public class EdicionU {
             return;
         }
 
-        // Crear un nuevo Stage para la ventana modal
         Stage modalStage = new Stage();
         modalStage.initOwner(parentStage);
-        modalStage.initModality(Modality.APPLICATION_MODAL); // Hace que sea modal
+        modalStage.initModality(Modality.APPLICATION_MODAL);
         modalStage.setTitle("Edición de Usuario");
 
-        // Título
         Label titulo = new Label("Edición de usuario");
         titulo.setStyle("-fx-font-size: 26px; -fx-font-weight: bold;");
         HBox tituloLayout = new HBox(titulo);
         tituloLayout.setAlignment(Pos.CENTER);
 
-        // Campos de edición
         Label lblNombre = new Label("Nombre");
         lblNombre.setStyle("-fx-font-weight: bold;");
         TextField txtNombre = new TextField(empleado.getNombre());
@@ -69,7 +65,6 @@ public class EdicionU {
         HBox tipoLayout = new HBox(10, rbAdministrador, rbCajero);
         tipoLayout.setAlignment(Pos.CENTER_LEFT);
 
-        // Botones de acción
         Button btnEliminar = new Button("ELIMINAR USUARIO");
         btnEliminar.setStyle("-fx-background-color: #FF0000; -fx-text-fill: white; -fx-font-weight: bold;");
         btnEliminar.setOnAction(e -> {
@@ -82,7 +77,6 @@ public class EdicionU {
                         Alert alerta = new Alert(Alert.AlertType.INFORMATION, "Usuario eliminado correctamente.");
                         alerta.showAndWait();
 
-                        // Actualizar la tabla en la interfaz principal
                         if (parentStage.getScene().getRoot() instanceof VBox layoutPrincipal) {
                             TableView<Empleado> tablaUsuarios = (TableView<Empleado>) layoutPrincipal.lookup("#tablaUsuarios");
                             if (tablaUsuarios != null) {
@@ -90,7 +84,7 @@ public class EdicionU {
                             }
                         }
 
-                        modalStage.close(); // Cerrar la ventana modal
+                        modalStage.close();
                     } catch (Exception ex) {
                         Alert alerta = new Alert(Alert.AlertType.ERROR, "Error al eliminar usuario: " + ex.getMessage());
                         alerta.showAndWait();
@@ -119,7 +113,6 @@ public class EdicionU {
                         Alert alerta = new Alert(Alert.AlertType.INFORMATION, "Usuario actualizado correctamente.");
                         alerta.showAndWait();
 
-                        // Actualizar la tabla en la interfaz principal
                         if (parentStage.getScene().getRoot() instanceof VBox layoutPrincipal) {
                             TableView<Empleado> tablaUsuarios = (TableView<Empleado>) layoutPrincipal.lookup("#tablaUsuarios");
                             if (tablaUsuarios != null) {
@@ -127,7 +120,7 @@ public class EdicionU {
                             }
                         }
 
-                        modalStage.close(); // Cerrar la ventana modal
+                        modalStage.close();
                     } catch (SQLException ex) {
                         if (ex.getMessage().contains("CHK_CORREO_ELECTRONICO")) {
                             Alert alerta = new Alert(Alert.AlertType.ERROR, "El correo electrónico no tiene un formato válido.");
@@ -150,7 +143,7 @@ public class EdicionU {
             confirmacion.setTitle("Confirmación de cancelación");
             confirmacion.showAndWait().ifPresent(response -> {
                 if (response == ButtonType.YES) {
-                    modalStage.close(); // Cerrar la ventana modal
+                    modalStage.close();
                 }
             });
         });
@@ -158,7 +151,6 @@ public class EdicionU {
         HBox botonesLayout = new HBox(20, btnEliminar, btnGuardar, btnCancelar);
         botonesLayout.setAlignment(Pos.CENTER);
 
-        // Layout principal
         GridPane gridPane = new GridPane();
         gridPane.setVgap(10);
         gridPane.setHgap(10);
@@ -183,6 +175,6 @@ public class EdicionU {
 
         Scene scene = new Scene(layout, 600, 400);
         modalStage.setScene(scene);
-        modalStage.showAndWait(); // Mostrar la ventana modal y esperar
+        modalStage.showAndWait();
     }
 }

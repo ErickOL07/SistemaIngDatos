@@ -5,8 +5,9 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class Conexion {
-    private static final String URL = "jdbc:oracle:thin:@0.tcp.sa.ngrok.io:19407:xe";
-    private static final String USER = "sys as sysdba";
+    // Cambiar la URL al formato de Microsoft SQL Server
+    private static final String URL = "jdbc:sqlserver://localhost:1433;databaseName=MundoMascotasDB;encrypt=true;trustServerCertificate=true";
+    private static final String USER = "sa";
     private static final String PASSWORD = "123";
 
     private static Connection conexion;
@@ -14,7 +15,8 @@ public class Conexion {
     public static Connection conectar() throws SQLException {
         if (conexion == null || conexion.isClosed()) {
             try {
-                Class.forName("oracle.jdbc.OracleDriver");
+                // Cargar el driver para SQL Server
+                Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
                 conexion = DriverManager.getConnection(URL, USER, PASSWORD);
                 System.out.println("Conexión exitosa a la base de datos.");
             } catch (ClassNotFoundException e) {
@@ -32,15 +34,11 @@ public class Conexion {
         }
     }
 
-    // Método para obtener una nueva conexión
     public static Connection getConexion() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 
-
     public static void setConexion(Connection conexion) {
         Conexion.conexion = conexion;
     }
-    
-    
 }

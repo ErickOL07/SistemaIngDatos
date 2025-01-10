@@ -10,23 +10,22 @@ import javafx.scene.layout.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.sql.SQLException;
+
 public class CreacionU {
     private final EmpleadoRep empleadoRep = new EmpleadoRep();
 
     public void start(Stage parentStage) {
-        // Crear un nuevo Stage para la ventana modal
         Stage modalStage = new Stage();
         modalStage.initOwner(parentStage);
-        modalStage.initModality(Modality.APPLICATION_MODAL); // Hace que sea modal
+        modalStage.initModality(Modality.APPLICATION_MODAL);
         modalStage.setTitle("Creación de Usuario");
 
-        // Título
         Label titulo = new Label("Creación de usuario");
         titulo.setStyle("-fx-font-size: 26px; -fx-font-weight: bold;");
         HBox tituloLayout = new HBox(titulo);
         tituloLayout.setAlignment(Pos.CENTER);
 
-        // Campos de entrada
         Label lblNombre = new Label("Nombre");
         lblNombre.setStyle("-fx-font-weight: bold;");
         TextField txtNombre = new TextField();
@@ -54,11 +53,10 @@ public class CreacionU {
         rbAdministrador.setToggleGroup(toggleGroup);
         RadioButton rbCajero = new RadioButton("Cajero");
         rbCajero.setToggleGroup(toggleGroup);
-        rbAdministrador.setSelected(true); // Por defecto, administrador seleccionado
+        rbAdministrador.setSelected(true); // Por defecto administrador seleccionado
         HBox tipoLayout = new HBox(10, rbAdministrador, rbCajero);
         tipoLayout.setAlignment(Pos.CENTER_LEFT);
 
-        // Botones de acción
         Button btnRegistrar = new Button("REGISTRAR");
         btnRegistrar.setStyle("-fx-background-color: #D3D3D3; -fx-font-weight: bold;");
         btnRegistrar.setOnAction(e -> {
@@ -67,15 +65,23 @@ public class CreacionU {
                 alerta.showAndWait();
                 return;
             }
+
             try {
+                if (empleadoRep.buscarEmpleadoPorCorreo(txtCorreo.getText()) != null) {
+                    Alert alerta = new Alert(Alert.AlertType.ERROR, "El correo ya está registrado.");
+                    alerta.showAndWait();
+                    return;
+                }
+
                 Empleado nuevoEmpleado = new Empleado(
-                        0, // ID generado automáticamente por la base de datos
+                        0,
                         txtNombre.getText(),
                         txtCorreo.getText(),
                         txtContrasena.getText(),
                         rbAdministrador.isSelected() ? 1 : 2,
                         txtDni.getText()
                 );
+
                 empleadoRep.insertarEmpleado(nuevoEmpleado);
 
                 Alert alerta = new Alert(Alert.AlertType.INFORMATION, "Usuario creado correctamente.");
@@ -89,9 +95,14 @@ public class CreacionU {
                     }
                 }
 
-                modalStage.close(); // Cerrar la ventana modal
-            } catch (Exception ex) {
+                modalStage.close();
+
+            } catch (SQLException ex) {
                 Alert alerta = new Alert(Alert.AlertType.ERROR, "Error al crear usuario: " + ex.getMessage());
+                alerta.showAndWait();
+                ex.printStackTrace();
+            } catch (Exception ex) {
+                Alert alerta = new Alert(Alert.AlertType.ERROR, "Error inesperado: " + ex.getMessage());
                 alerta.showAndWait();
                 ex.printStackTrace();
             }
@@ -101,7 +112,7 @@ public class CreacionU {
         Button btnCancelar = new Button("CANCELAR");
         btnCancelar.setStyle("-fx-background-color: #D3D3D3; -fx-font-weight: bold;");
         btnCancelar.setOnAction(e -> {
-            modalStage.close(); // Cerrar la ventana modal
+            modalStage.close();
         });
 
         HBox botonesLayout = new HBox(20, btnRegistrar, btnCancelar);
@@ -134,6 +145,6 @@ public class CreacionU {
 
         Scene scene = new Scene(layout, 600, 400);
         modalStage.setScene(scene);
-        modalStage.showAndWait(); // Mostrar la ventana modal y esperar
+        modalStage.showAndWait();
     }
 }

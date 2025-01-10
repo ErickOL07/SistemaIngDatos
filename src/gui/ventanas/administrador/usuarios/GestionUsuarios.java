@@ -20,7 +20,7 @@ import java.sql.SQLException;
 public class GestionUsuarios extends Application {
 
     private final EmpleadoRep empleadoRep = new EmpleadoRep();
-    private static Empleado empleadoSeleccionado; // Variable para almacenar el empleado seleccionado
+    private static Empleado empleadoSeleccionado;
 
     public static Empleado getEmpleadoSeleccionado() {
         return empleadoSeleccionado;
@@ -31,7 +31,7 @@ public class GestionUsuarios extends Application {
         // Logo principal
         Image logoImage = new Image("https://objectstorage.us-ashburn-1.oraclecloud.com/n/idew1j1vbcak/b/bucket-20241201-0716/o/LogoMundoMascotasMundo%20Mascotas%20-%20Logo.png");
         ImageView logoView = new ImageView(logoImage);
-        logoView.setFitWidth(250); // Tamaño aumentado
+        logoView.setFitWidth(250);
         logoView.setPreserveRatio(true);
 
         // Título
@@ -49,7 +49,7 @@ public class GestionUsuarios extends Application {
         btnVolver.setStyle("-fx-background-color: transparent;");
         btnVolver.setOnAction(e -> {
             try {
-                new PrincipalAdmin().start(primaryStage); // Regresa a PrincipalAdmin
+                new PrincipalAdmin().start(primaryStage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -95,7 +95,7 @@ public class GestionUsuarios extends Application {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     empleadoSeleccionado = row.getItem();
                     try {
-                        new EdicionU().start(primaryStage); // Abrir EdicionU con el empleado seleccionado
+                        new EdicionU().start(primaryStage);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -110,7 +110,7 @@ public class GestionUsuarios extends Application {
         btnRegistrar.setPrefWidth(250);
         btnRegistrar.setOnAction(e -> {
             try {
-                new CreacionU().start(primaryStage); // Abrir CreacionU
+                new CreacionU().start(primaryStage);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -125,7 +125,6 @@ public class GestionUsuarios extends Application {
         tableContainer.setPadding(new Insets(20));
         tableContainer.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-border-width: 1;");
 
-        // Llenar la tabla desde la base de datos
         llenarTabla(tablaUsuarios);
 
         // Layout principal
@@ -141,9 +140,8 @@ public class GestionUsuarios extends Application {
         primaryStage.show();
     }
 
-    // Método para llenar la tabla desde la base de datos
     public void llenarTabla(TableView<Empleado> tablaUsuarios) {
-        tablaUsuarios.getItems().clear(); // Limpiar los datos actuales de la tabla
+        tablaUsuarios.getItems().clear();
         try {
             ListaEnlazada<Empleado> empleados = empleadoRep.listarEmpleados();
             if (empleados != null) {

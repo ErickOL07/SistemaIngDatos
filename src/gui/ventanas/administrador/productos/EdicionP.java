@@ -20,8 +20,7 @@ import java.util.List;
 public class EdicionP {
     private final ProductoRep productoRep = new ProductoRep();
 
-    public void start(Stage parentStage) {
-        // Obtener el producto seleccionado
+    public void start(Stage parentStage, TableView<Producto> tablaProductos) {
         Producto producto = GestionProductos.getProductoSeleccionado();
         if (producto == null) {
             Alert alerta = new Alert(Alert.AlertType.ERROR, "No se seleccionó ningún producto.");
@@ -30,25 +29,20 @@ public class EdicionP {
         }
 
 
-        // Crear un nuevo Stage para la ventana modal
         Stage modalStage = new Stage();
         modalStage.initOwner(parentStage);
         modalStage.initModality(Modality.APPLICATION_MODAL);
         modalStage.setTitle("Edición de producto");
 
-        // Título
         Label titulo = new Label("Edición de producto");
         titulo.setStyle("-fx-font-size: 26px; -fx-font-weight: bold;");
         HBox tituloLayout = new HBox(titulo);
         tituloLayout.setAlignment(Pos.CENTER);
 
-        // Campos de edición
         Label lblCategoria = new Label("Categoría");
         ComboBox<String> cbCategoria = new ComboBox<>();
         cbCategoria.getItems().addAll("Perros", "Gatos"); // Cargar categorías
         cbCategoria.setValue(producto.getCategoria());
-
-
 
         Label lblSubcategoria = new Label("Subcategoría");
         ComboBox<String> cbSubcategoria = new ComboBox<>();
@@ -56,11 +50,13 @@ public class EdicionP {
         cbSubcategoria.setValue(producto.getSubcategoria());
         cbCategoria.valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
+                cbSubcategoria.getItems().clear();
+                cbSubcategoria.setValue(null);
                 cargarSubcategorias(newValue, cbSubcategoria);
+                cbSubcategoria.setValue(null);
             }
         });
 
-        // Listener para actualizar subcategorías al cambiar la categoría
         cbCategoria.setOnAction(e -> cargarSubcategorias(cbCategoria.getValue(), cbSubcategoria));
 
 
@@ -102,7 +98,6 @@ public class EdicionP {
             });
         });
 
-        // Botones de acción
         Button btnEliminar = new Button("ELIMINAR PRODUCTO");
         btnEliminar.setStyle("-fx-background-color: #FF0000; -fx-text-fill: white; -fx-font-weight: bold;");
         btnEliminar.setOnAction(e -> {
@@ -130,23 +125,47 @@ public class EdicionP {
         btnGuardar.setStyle("-fx-background-color: #D3D3D3; -fx-font-weight: bold;");
         btnGuardar.setOnAction(e -> {
             try {
-                // Actualizar el producto...
+                String nuevaCategoria = cbCategoria.getValue();
+                String nuevaSubcategoria = cbSubcategoria.getValue();
+
+                if (nuevaCategoria == null || nuevaSubcategoria == null) {
+                    Alert alerta = new Alert(Alert.AlertType.WARNING, "Debe seleccionar una categoría y subcategoría.");
+                    alerta.showAndWait();
+                    return;
+                }
+
+                ListaEnlazada<String> subcategoriasValidas = productoRep.obtenerSubcategoriasPorCategoria(nuevaCategoria);
+                boolean subcategoriaValida = false;
+                Nodo<String> nodo = subcategoriasValidas.getHead();
+                while (nodo != null) {
+                    if (nodo.getData().equals(nuevaSubcategoria)) {
+                        subcategoriaValida = true;
+                        break;
+                    }
+                    nodo = nodo.getNext();
+                }
+
+                if (!subcategoriaValida) {
+                    Alert alerta = new Alert(Alert.AlertType.WARNING, "La subcategoría seleccionada no corresponde a la categoría.");
+                    alerta.showAndWait();
+                    return;
+                }
+
+                producto.setCategoria(nuevaCategoria);
+                producto.setSubcategoria(nuevaSubcategoria);
                 producto.setDescripcion(txtDescripcion.getText());
                 producto.setPrecio_Unitario(Float.parseFloat(txtPrecio.getText()));
                 producto.setStock(Integer.parseInt(txtStock.getText()));
-                producto.setCategoria(cbCategoria.getValue());
-                producto.setSubcategoria(cbSubcategoria.getValue());
+                producto.setImagen_Referencial(imgPreview.getImage().getUrl());
 
                 productoRep.actualizarProducto(producto);
 
-                // Llamar al procedimiento para actualizar concatenada
-                productoRep.ejecutarActualizarConcatenada();
-
-                Alert alerta = new Alert(Alert.AlertType.INFORMATION, "Producto actualizado correctamente y concatenada actualizada.");
+                Alert alerta = new Alert(Alert.AlertType.INFORMATION, "Producto actualizado correctamente.");
                 alerta.showAndWait();
 
-                // Recargar la tabla en la ventana principal
-                new GestionProductos().start(parentStage);
+                GestionProductos gestionProductos = new GestionProductos();
+                gestionProductos.llenarTabla(tablaProductos);
+
                 modalStage.close();
             } catch (SQLException ex) {
                 Alert alerta = new Alert(Alert.AlertType.ERROR, "Error al guardar cambios: " + ex.getMessage());
@@ -164,7 +183,6 @@ public class EdicionP {
         HBox botonesLayout = new HBox(20, btnEliminar, btnGuardar, btnCancelar);
         botonesLayout.setAlignment(Pos.CENTER);
 
-        // Layout principal
         GridPane gridPane = new GridPane();
         gridPane.setVgap(10);
         gridPane.setHgap(10);
@@ -190,7 +208,7 @@ public class EdicionP {
         layout.setPadding(new Insets(20));
         layout.setStyle("-fx-background-color: #D3D3D3;");
 
-        Scene scene = new Scene(layout, 500, 600);
+        Scene scene = new Scene(layout, 600, 600);
         modalStage.setScene(scene);
         modalStage.showAndWait();
 
@@ -204,16 +222,16 @@ public class EdicionP {
             Nodo<String> nodoActual = subcategorias.getHead();
 
             while (nodoActual != null) {
+                System.out.println("Subcategoría cargada: " + nodoActual.getData());
                 cbSubcategoria.getItems().add(nodoActual.getData());
                 nodoActual = nodoActual.getNext();
             }
-
-            System.out.println("Subcategorías cargadas para la categoría: " + categoria);
         } catch (SQLException e) {
             Alert alerta = new Alert(Alert.AlertType.ERROR, "Error al cargar subcategorías: " + e.getMessage());
             alerta.showAndWait();
         }
     }
+
 
 
 
